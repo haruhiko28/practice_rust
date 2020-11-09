@@ -1,4 +1,5 @@
 // use std::io::Write; // write, writelnマクロを使うため
+use std::thread;
 
 fn main() {
     println!("Hello, world!");
@@ -339,8 +340,96 @@ fn main() {
     println!("{:?}", t2);
     println!("{:?}", t3);
     println!("{:?}", t4);
+
+    // ムーブセマンティック
+    let a = Color2{r:255, g:255, b:255};
+    let b = a;
+    println!("{} {} {}",b.r, b.g, b.b);
+
+    // 借用
+    // let mut important_data = "Hello, World!".to_string();
+    // important_data = calc_data(important_data);
+    // println!("{}", important_data);
+
+    let important_data = "Hello, World!".to_string();
+
+    calc_data(&important_data);
+
+    println!("{}",&important_data);
+
+    // 不変な参照
+    let x = 5;
+    let y = &x;
+    let z = &x;
+
+    dbg!(x);
+    dbg!(y);
+    dbg!(z);
+
+    let mut x = 5;
+    let y = &mut x;
+    // let z = &mut x;
+
+    dbg!(y);
+    // dbg!(z);
+
+    let y = &x;
+    // let z = &mut x;
+
+    dbg!(y);
+    // dbg!(z);
+
+    // 借用の範囲の話めっちゃおもろいな
+    let mut x = 5;
+
+    // let y = &x;
+
+    let z = &mut x;
+
+    dbg!(z);
+
+    dbg!(x);
+
+    // {
+    //     let d = Droppable;
+    // }
+    println!("The Droppable should be released at the end of block.");
+
+    //スレッドを作る 不確定性がある
+    let mut handles = Vec::new();
+
+    for x in 0..10{
+        handles.push(thread::spawn(move ||{
+            println!("Hello, world! {}",x);
+        }))
+    }
+
+    for handle in handles {
+        let _ = handle.join();
+    }
+
 }
 // ======================================================================================================================================================
+// RALL
+// struct Droppable;
+
+// impl Drop for Droppable{
+//     fn drop(&mut self) {
+//         println!("Resource will be released!");
+//     }
+// }
+
+// 借用
+fn calc_data(data: &String){
+    println!("{}", data);
+}
+
+struct Color2 {
+    r: i32,
+    g: i32,
+    b: i32,
+}
+
 // ジェネリクス
 fn make_tuple<T,S>(t: T, s: S) -> (T,S){
     (t,s)
