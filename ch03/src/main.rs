@@ -397,6 +397,7 @@ fn main() {
 
     //スレッドを作る 不確定性がある
     let mut handles = Vec::new();
+    let mut data = vec![1;10];
 
     for x in 0..10{
         handles.push(thread::spawn(move ||{
@@ -407,6 +408,8 @@ fn main() {
     for handle in handles {
         let _ = handle.join();
     }
+
+    dbg!(data);
 
 }
 // ======================================================================================================================================================
