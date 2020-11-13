@@ -3,6 +3,7 @@ use std::thread;
 // use std::rc::Rc;
 use std::sync::{Arc, Mutex};
 use std::sync::mpsc;
+use futures::executor;
 
 fn main() {
     println!("Hello, world!");
@@ -461,9 +462,38 @@ fn main() {
 
         dbg!(data);
 
-
+        // SendとSync
+        executor::block_on(find_user_by_id(Db {}, UserId(1)));
 }
 // ======================================================================================================================================================
+// SendとSync
+
+// struct User {
+//     // なんか入ってる
+//     // 今回削っちゃったのでコメントアウト
+// }
+
+pub trait Future {
+    type Output;
+    
+}
+struct UserId(u32);
+
+struct Db{}
+
+impl Db {
+    async fn find_by_user_id(&self, _user_id: UserId) -> i32 {
+        // DBに接続するなどの実装が追加する
+        // 本当はUser
+        0
+    }
+}
+
+async fn find_user_by_id(db: Db, user_id: UserId) -> i32 {
+    //dbはデータベースアクセスを示す。
+    db.find_by_user_id(user_id).await
+}
+
 // RALL
 // struct Droppable;
 
