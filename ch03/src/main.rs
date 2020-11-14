@@ -7,7 +7,11 @@ use futures::{executor, future::join_all};
 use std::future::Future;
 use std::pin::Pin;
 use std::task::{Context, Poll};
+use async_trait::async_trait;
 
+// #[tokio::main]
+// #[async_std::main]
+// async fn main() {
 fn main() {
     println!("Hello, world!");
     // 文字列 convert str and String
@@ -476,8 +480,89 @@ fn main() {
     for (i, s) in res.iter().enumerate(){
         println!("{} : {}", i, s);
     }
+
+    // async/await
+    executor::block_on(something_great_async_function());
+    executor::block_on(calculate());
+
+    // let ans = add1(2,3).await;
+    // println!("{}",ans);
 }       
+
 // ======================================================================================================================================================
+// async-trait
+#[async_trait]
+pub trait AsyncTrait {
+    async fn f(&self);
+}
+
+struct Runner {}
+
+#[async_trait]
+impl AsyncTrait for Runner {
+    async fn f(&self) {
+        println!("Hello, async-trait!");
+    }
+}
+
+// 非同期ランタイム
+// async fn add1(left: i32, right: i32) -> i32{
+//     left + right
+// }
+
+// ライフタイム
+// async fn some_great_function(arg: &i32) -> i32{
+//     *arg
+// }
+
+// fn some_great_function<'a>(arg: &'a i32) -> impl Future<Output = i32> + 'a{
+//     async move {
+//         *arg
+//     }
+// }
+
+// fn some_great_function() -> impl Future<Output = i32>{
+//     async {
+//         let value: i32 = 5;
+//         send_to_another_thread_with_borrowing(&value).await
+//     }
+// }
+
+
+// ムーブ 警告出るのでコメントアウト
+// fn move_to_async_block() -> impl Future<Output = ()>{
+//     let outside_variable = "this is outside".to_string();
+//     async move{
+//         println!("{}", outside_variable);
+//     }
+// }
+
+// async/await
+async fn print_result(value: i32){
+    println!("{}", value);
+}
+
+async fn calculate() -> i32 {
+    let add1 = async_add(2, 3).await;
+    print_result(add1).await;
+    let add2 = async_add(3, 4).await;
+    print_result(add2).await;
+    async_add(add1, add2).await
+}
+
+async fn something_great_async_function() -> i32 {
+    let ans1 = async_add(2, 3).await;
+    let ans2 = async_add(3, 4).await;
+    let ans3 = async_add(4, 5).await;
+    let result = ans1 + ans2 + ans3;
+    println!("{}", result);
+    result
+}
+
+async fn async_add(left: i32, right: i32) -> i32{
+    left + right
+}
+
 
 // Future
 // pub trait Future {
