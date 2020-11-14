@@ -3,7 +3,10 @@ use std::thread;
 // use std::rc::Rc;
 use std::sync::{Arc, Mutex};
 use std::sync::mpsc;
-use futures::executor;
+use futures::{executor, future::join_all};
+use std::future::Future;
+use std::pin::Pin;
+use std::task::{Context, Poll};
 
 fn main() {
     println!("Hello, world!");
@@ -447,25 +450,64 @@ fn main() {
             let _ = rcv_tx.send(data);
         }));
     }
-        //各スレッドにdataの値を送信
-        for x in 0..10{
-            let _ = snd_channels[x].send(data[x]);
-        }
+    //各スレッドにdataの値を送信
+    for x in 0..10{
+        let _ = snd_channels[x].send(data[x]);
+    }
 
-        for x in 0..10{
-            data[x] = rcv_channels[x].recv().unwrap();
-        }
+    for x in 0..10{
+        data[x] = rcv_channels[x].recv().unwrap();
+    }
 
-        for handle in handles{
-            let _ = handle.join();
-        }
+    for handle in handles{
+        let _ = handle.join();
+    }
 
-        dbg!(data);
+    dbg!(data);
 
-        // SendとSync
-        executor::block_on(find_user_by_id(Db {}, UserId(1)));
-}
+    // SendとSync
+    executor::block_on(find_user_by_id(Db {}, UserId(1)));
+    
+    // Future
+    let countdown_future1 = CountDown(10);
+    let countdown_future2 = CountDown(20);
+    let cd_set = join_all(vec![countdown_future1, countdown_future2]);
+    let res = executor::block_on(cd_set);
+    for (i, s) in res.iter().enumerate(){
+        println!("{} : {}", i, s);
+    }
+}       
 // ======================================================================================================================================================
+
+// Future
+// pub trait Future {
+//     type Output;
+//     fn poll(self: Pin<&mut Self>, cx: &mut Context) -> Poll<Self::Output>;
+// }
+
+// pub enum Poll<T>{
+//     Ready(T),
+//     Pending,
+// }
+
+struct CountDown(u32);
+
+impl Future for CountDown{
+    type Output = String;
+    fn poll(mut self:Pin<&mut Self>, cx: &mut Context) -> Poll<String>{
+        if self.0 == 0 {
+            Poll::Ready("Zero!!".to_string())
+        }else{
+            println!("{}",self.0);
+            self.0 -= 1;
+            cx.waker().wake_by_ref();
+            Poll::Pending
+        }
+    }
+}
+
+
+
 // SendとSync
 
 // struct User {
@@ -473,12 +515,8 @@ fn main() {
 //     // 今回削っちゃったのでコメントアウト
 // }
 
-pub trait Future {
-    type Output;
-    
-}
 struct UserId(u32);
-
+    
 struct Db{}
 
 impl Db {
