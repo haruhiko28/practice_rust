@@ -13,3 +13,5 @@ ch03/target/*
 ch03/new_crate/target/*
 
 Cargo.toml
+
+samplecli/target/*
