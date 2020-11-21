@@ -64,7 +64,7 @@ impl RpnCalculator {
     }
 
     pub fn eval(&self, formula: &str) -> i32 {
-        let mut tokens = formula.split_whitespace().rev().collect::<Vec<_>>();
+        let mut tokens = formula.split_whitespace().rev().collect::<Vec<_>>(); //スペースで切って、逆順にして、Vecにする
         self.eval_inner(&mut tokens)
     }
 
@@ -72,9 +72,9 @@ impl RpnCalculator {
         let mut stack = Vec::new();
 
         while let Some(token) = tokens.pop(){
-            if let Ok(x) = token.parse::<i32>() {
+            if let Ok(x) = token.parse::<i32>() { //数字ならstackに格納
                 stack.push(x);
-            } else {
+            } else { // 演算子ならstackから取り出して計算
                 let y = stack.pop().expect("invalid syntax");
                 let x = stack.pop().expect("invalid syntax");
                 let res = match token {
@@ -84,7 +84,7 @@ impl RpnCalculator {
                     "/" => x / y,
                     _ => panic!("invalid token") ,
                 };
-            stack.push(res);
+            stack.push(res); // 出した答えをstackにいれる
             }
 
             if self.0 {
