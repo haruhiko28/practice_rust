@@ -1,5 +1,7 @@
 // use std::env;
 // use clap::{App, Arg};
+
+use anyhow::{bail, ensure, Context, Result};
 use clap::Clap;
 use std::fs::File;
 use std::io::{stdin, BufRead, BufReader};
@@ -70,8 +72,11 @@ impl RpnCalculator {
 
     fn eval_inner(&self, tokens: &mut Vec<&str>) -> i32 {
         let mut stack = Vec::new();
+        let mut pos  = 0;
 
         while let Some(token) = tokens.pop(){
+            pos += 1;
+            
             if let Ok(x) = token.parse::<i32>() { //数字ならstackに格納
                 stack.push(x);
             } else { // 演算子ならstackから取り出して計算
