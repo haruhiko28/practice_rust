@@ -5,58 +5,6 @@ use anyhow::{bail, ensure, Context, Result};
 use clap::Clap;
 use std::fs::File;
 use std::io::{stdin, BufRead, BufReader};
-#[derive(Clap, Debug)]
-#[clap(
-    name = "My RPN program",
-    version = "1.0.0",
-    author = "Your Name",
-    about = "Super awesome sample RPN calculator"
-)]
-struct Opts {
-    /// Sets the lebel of verbosity
-    #[clap(short, long)]
-    verbose: bool,
-
-    /// Formulas writeen in RPN
-    #[clap(name = "FILE")]
-    formula_file: Option<String>,
-}
-
-fn main() {
-    let opts = Opts::parse();
-    // 4−1
-    // match opts.formula_file {
-    //     Some(file) => println!("File specified: {}", file),
-    //     None => println!("No file specified."),
-    // }
-    // println!("Is versity specified?: {}",opts.verbose);
-
-    if let Some(path) = opts.formula_file {
-        let f = File::open(path).unwrap();
-        let reader = BufReader::new(f);
-        run(reader, opts.verbose);
-        // for line in reader.lines() {
-        //     let line = line.unwrap();
-        //     println!("{}", line);
-        // }
-    } else {
-        //ファイル指定がなかった場合
-        let stdin = stdin();
-        let reader = stdin.lock();
-        run(reader, opts.verbose);
-        // println!("No file is specified!");
-    }
-}
-
-fn run<R: BufRead> (reader: R, verbose: bool){
-    let calc = RpnCalculator::new(verbose);
-
-    for line in reader.lines(){
-        let line = line.unwrap();
-        let answer = calc.eval(&line);
-        println!("{}", answer);
-    }
-}
 
 struct RpnCalculator(bool);
 
@@ -96,13 +44,70 @@ impl RpnCalculator {
                 println!("{:?} {:?}", tokens, stack);
             }
         }
-        if stack.len() == 1 {
-            stack[0]
-        }else {
-            panic!("invalid syntax")
-        }
+        
+        ensure!(stack.len() == 1, "invalid syntax");
+
+        Ok(stack[0])
     }
 }
+
+#[derive(Clap, Debug)]
+#[clap(
+    name = "My RPN program",
+    version = "1.0.0",
+    author = "Your Name",
+    about = "Super awesome sample RPN calculator"
+)]
+struct Opts {
+    /// Sets the lebel of verbosity
+    #[clap(short, long)]
+    verbose: bool,
+
+    /// Formulas writeen in RPN
+    #[clap(name = "FILE")]
+    formula_file: Option<String>,
+}
+
+fn main() -> Result<()> {
+    let opts = Opts::parse();
+    // 4−1
+    // match opts.formula_file {
+    //     Some(file) => println!("File specified: {}", file),
+    //     None => println!("No file specified."),
+    // }
+    // println!("Is versity specified?: {}",opts.verbose);
+
+    if let Some(path) = opts.formula_file {
+        let f = File::open(path).unwrap();
+        let reader = BufReader::new(f);
+        run(reader, opts.verbose);
+        // for line in reader.lines() {
+        //     let line = line.unwrap();
+        //     println!("{}", line);
+        // }
+    } else {
+        //ファイル指定がなかった場合
+        let stdin = stdin();
+        let reader = stdin.lock();
+        run(reader, opts.verbose);
+        // println!("No file is specified!");
+    }
+}
+
+fn run<R: BufRead> (reader: R, verbose: bool) -> Result<()>{
+    let calc = RpnCalculator::new(verbose);
+
+    for line in reader.lines(){
+        let line = line?;
+        match calc.eval(&line) {
+            Ok(answer) => println!("{}",answer),
+            Err(e) => eprintln!("{:#?}",e),
+        }
+    }
+    Ok(())
+}
+
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -121,6 +126,12 @@ mod tests {
         assert_eq!(calc.eval("2 3 /"), 0);
         assert_eq!(calc.eval("2 3 %"), 2);
     }
+}
+
+#[test]
+fn test_ng() {
+    let calc = RpnCalculator::new(false);
+    assert!(cal)
 }
 
 // 4-1
