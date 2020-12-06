@@ -15,3 +15,5 @@ ch03/new_crate/target/*
 Cargo.toml
 
 samplecli/target/*
+
+todo/target/*
