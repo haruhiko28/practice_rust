@@ -17,3 +17,4 @@ Cargo.toml
 samplecli/target/*
 
 todo/target/*
+todo/todo.db
