@@ -18,3 +18,5 @@ samplecli/target/*
 
 todo/target/*
 todo/todo.db
+
+ui_demo/target/*
