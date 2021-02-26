@@ -20,3 +20,5 @@ todo/target/*
 todo/todo.db
 
 ui_demo/target/*
+
+.DS_Store
