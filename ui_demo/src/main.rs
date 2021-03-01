@@ -3,23 +3,38 @@ use iced::{
     HorizontalAlignment, Length, Row, Settings, Subscription, Text,
 };
 
+#[derive(Debug, Clone)]
+pub enum Message {
+    Start,
+    Stop,
+    Reset,
+}
+
+pub enum TickState {
+    Stopped,
+    Ticking,
+}
+
 const FONT: Font = Font::External {
     name: "PixelMplus12-Regular",
     bytes: include_bytes!("../rsc/PixelMplus12-Regular.ttf"),
 };
 
 struct GUI {
+    tick_state: TickState,
     start_stop_button_state: button::State,
     reset_button_state: button::State,
 }
 
 impl Application for GUI {
     type Executor = executor::Null;
-    type Message = ();
+    type Message = Message;
     type Flags = ();
 
     fn new(_flags: ()) -> (GUI, Command<Self::Message>) {
-        (GUI {
+        (
+            GUI {
+            tick_state: TickState::Stopped,
             start_stop_button_state: button::State::new(),
             reset_button_state: button::State::new(),
         }, 
@@ -36,7 +51,24 @@ impl Application for GUI {
     
     fn view(&mut self) -> Element<Self::Message> {
         // init widgets
-        let tick_text = Text::new("00:00:00.00").font(FONT).size(60);
+        //prepare duration text
+        let duration_text = "00:00:00.00";
+
+        let start_stop_text = match self.tick_state {
+            TickState::Stopped => Text::new("Start")
+            .horizontal_alignment(HorizontalAlignment::Center)
+            .font(FONT),
+            TickState::Ticking => Text::new("Stop")
+            .horizontal_alignment(HorizontalAlignment::Center)
+            .font(FONT),
+        };
+        
+        let start_stop_message = match self.tick_state {
+            TickState::Stopped => Message::Start,
+            TickState::Ticking => Message::Stop,
+        };
+        
+        let tick_text = Text::new(duration_text).font(FONT).size(60);
 
         let start_stop_button = Button::new(
             &mut self.start_stop_button_state,
