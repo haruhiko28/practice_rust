@@ -1,11 +1,8 @@
 fn main() {
-    let x = 5;
-    
-    let x = x + 1;
-    
-    let x = x*2;
+    let spaces = "  ";
+    let spaces = spaces.len();
 
-    println!("The value of x is {}", x); // x = 12
+    println!("The value of spaces is {}", spaces); // x = 12
 
     // 手数はconstと全て大文字でアンダースコアで単語区切り
     const MAX_POINTS: u32 = 100_000;
